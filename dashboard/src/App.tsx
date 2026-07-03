@@ -1,3 +1,4 @@
+import { DeviceStatusPanel } from "./DeviceStatusPanel";
 import { useOfficeSocket } from "./useOfficeSocket";
 
 export function App() {
@@ -14,10 +15,7 @@ export function App() {
 
       <main className="app__main">
         {snapshot ? (
-          <p className="headline">
-            <strong>{snapshot.totalWatts} W</strong> now ·{" "}
-            <strong>{snapshot.todayKwh} kWh</strong> today
-          </p>
+          <DeviceStatusPanel snapshot={snapshot} />
         ) : (
           <p className="muted">Waiting for data…</p>
         )}
