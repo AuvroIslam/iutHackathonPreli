@@ -36,6 +36,10 @@ export function createApp(store: OfficeStore): Express {
     });
   });
 
+  app.get("/api/alerts", (_req, res) => {
+    res.json({ alerts: store.activeAlerts(), timestamp: store.snapshot().timestamp });
+  });
+
   app.get("/api/room/:room", (req, res) => {
     const { room } = req.params;
     if (!isRoomId(room)) {

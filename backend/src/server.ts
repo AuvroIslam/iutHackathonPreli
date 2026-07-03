@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { SOCKET_EVENTS, type OfficeSnapshot } from "@office/shared";
+import { SOCKET_EVENTS, type Alert, type OfficeSnapshot } from "@office/shared";
 import { createApp } from "./app";
 import { OfficeStore } from "./store";
 
@@ -20,6 +20,10 @@ io.on("connection", (socket) => {
 
 store.on("update", (snapshot: OfficeSnapshot) => {
   io.emit(SOCKET_EVENTS.stateUpdate, snapshot);
+});
+
+store.on("alert", (alert: Alert) => {
+  io.emit(SOCKET_EVENTS.alertNew, alert);
 });
 
 store.start(TICK_MS);
