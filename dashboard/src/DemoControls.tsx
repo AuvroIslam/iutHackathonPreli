@@ -12,16 +12,13 @@ async function post(path: string, body?: unknown): Promise<void> {
  */
 export function DemoControls() {
   return (
-    <section className="panel demo">
-      <span className="panel__title" style={{ margin: 0 }}>
-        Demo
-      </span>
-      <button className="btn" onClick={() => void post("/api/sim/settime", { hour: 22 })}>
+    <div className="demo">
+      <button className="btn btn--dark" onClick={() => void post("/api/sim/settime", { hour: 22 })}>
         Warp to 10 PM
       </button>
-      <button className="btn" onClick={() => void post("/api/sim/reset")}>
+      <button className="btn btn--ghost" onClick={() => void post("/api/sim/reset")}>
         Reset clock
       </button>
-    </section>
+    </div>
   );
 }

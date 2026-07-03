@@ -1,99 +1,85 @@
-import { ROOMS, type OfficeSnapshot } from "@office/shared";
+import { ROOMS, type Device, type OfficeSnapshot, type RoomId } from "@office/shared";
+import { ROOM_IMAGES } from "./assets";
+import { DeviceIcon } from "./ui/DeviceIcon";
 
-const ROOM_W = 260;
-const ROOM_H = 300;
-const ROOM_GAP = 30;
-const ROOM_Y = 10;
+/**
+ * Ceiling-fixture positions (% of the room image). Fans sit high on a wide
+ * centre line (above the desks); lights spread along a lower band, inset from
+ * the walls and clear of the door in the bottom-right corner.
+ */
+const FAN_SPOTS = [
+  { x: 31, y: 23 },
+  { x: 69, y: 23 },
+];
+const LIGHT_SPOTS = [
+  { x: 24, y: 72 },
+  { x: 50, y: 72 },
+  { x: 70, y: 72 },
+];
 
-const LIGHT_X = [60, 130, 200];
-const LIGHT_Y = 100;
-const FAN_X = [95, 175];
-const FAN_Y = 215;
+function RoomTile({ room, name, devices }: { room: RoomId; name: string; devices: Device[] }) {
+  const lights = devices.filter((d) => d.type === "light");
+  const fans = devices.filter((d) => d.type === "fan");
 
-function FanIcon({ cx, cy, on }: { cx: number; cy: number; on: boolean }) {
   return (
-    <g className={`fp-fan ${on ? "fp-fan--on" : ""}`}>
-      {[0, 120, 240].map((deg) => (
-        <ellipse
-          key={deg}
-          className="fp-fan-blade"
-          cx={cx}
-          cy={cy - 10}
-          rx={5}
-          ry={10}
-          transform={`rotate(${deg} ${cx} ${cy})`}
-        />
-      ))}
-      <circle className="fp-fan-hub" cx={cx} cy={cy} r={3.5} />
-    </g>
+    <div className="fp-room">
+      <img className="fp-room__img" src={ROOM_IMAGES[room]} alt={`${name} top view`} />
+      <div className="fp-room__overlay">
+        {fans.map((fan, i) => (
+          <span
+            key={fan.id}
+            className="fp-dot"
+            style={{ left: `${FAN_SPOTS[i]?.x ?? 50}%`, top: `${FAN_SPOTS[i]?.y ?? 50}%` }}
+          >
+            <DeviceIcon type="fan" on={fan.status === "on"} size={42} className="fp-icon" />
+          </span>
+        ))}
+        {lights.map((light, i) => (
+          <span
+            key={light.id}
+            className="fp-dot"
+            style={{ left: `${LIGHT_SPOTS[i]?.x ?? 50}%`, top: `${LIGHT_SPOTS[i]?.y ?? 70}%` }}
+          >
+            <DeviceIcon type="light" on={light.status === "on"} size={30} className="fp-icon" />
+          </span>
+        ))}
+      </div>
+      <span className="fp-room__label">{name}</span>
+    </div>
   );
 }
 
-/**
- * Top-view office layout. Lights glow when ON and fans spin when running,
- * reflecting the live device state straight from the snapshot.
- */
+/** Top-view office layout: lights glow and fans spin from live device state. */
 export function Floorplan({ snapshot }: { snapshot: OfficeSnapshot }) {
-  const onIds = new Set(
-    snapshot.devices.filter((device) => device.status === "on").map((device) => device.id),
-  );
-  const isOn = (id: string): boolean => onIds.has(id);
-
-  const totalW = ROOMS.length * ROOM_W + (ROOMS.length - 1) * ROOM_GAP;
-
   return (
-    <section className="panel">
-      <h2 className="panel__title">Office Layout (Top View)</h2>
-      <svg
-        className="fp"
-        viewBox={`0 0 ${totalW} ${ROOM_H + 2 * ROOM_Y}`}
-        role="img"
-        aria-label="Office floorplan with live device states"
-      >
-        {ROOMS.map((room, roomIndex) => {
-          const ox = roomIndex * (ROOM_W + ROOM_GAP);
-          return (
-            <g key={room.id} transform={`translate(${ox}, 0)`}>
-              <rect className="fp-room" x={0} y={ROOM_Y} width={ROOM_W} height={ROOM_H} rx={10} />
-              <text className="fp-room-label" x={ROOM_W / 2} y={ROOM_Y + 26} textAnchor="middle">
-                {room.name}
-              </text>
+    <section className="card card--floor">
+      <div className="card__head">
+        <h2 className="card__title">Office Floorplan</h2>
+        <div className="fp-legend">
+          <span className="fp-legend__item">
+            <DeviceIcon type="light" on size={16} /> Light on
+          </span>
+          <span className="fp-legend__item">
+            <DeviceIcon type="light" on={false} size={16} /> Light off
+          </span>
+          <span className="fp-legend__item">
+            <DeviceIcon type="fan" on size={16} /> Fan running
+          </span>
+          <span className="fp-legend__item">
+            <DeviceIcon type="fan" on={false} size={16} /> Fan off
+          </span>
+        </div>
+      </div>
 
-              {LIGHT_X.map((lx, i) => (
-                <g key={`light-${i}`}>
-                  <circle
-                    className={`fp-light ${isOn(`${room.id}-light-${i + 1}`) ? "fp-light--on" : ""}`}
-                    cx={lx}
-                    cy={LIGHT_Y}
-                    r={11}
-                  />
-                  <text className="fp-dev-label" x={lx} y={LIGHT_Y + 26} textAnchor="middle">
-                    L{i + 1}
-                  </text>
-                </g>
-              ))}
-
-              {FAN_X.map((fx, i) => (
-                <g key={`fan-${i}`}>
-                  <FanIcon cx={fx} cy={FAN_Y} on={isOn(`${room.id}-fan-${i + 1}`)} />
-                  <text className="fp-dev-label" x={fx} y={FAN_Y + 30} textAnchor="middle">
-                    F{i + 1}
-                  </text>
-                </g>
-              ))}
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="fp-legend">
-        <span>
-          <i className="fp-legend-dot fp-legend-dot--on" /> Light on
-        </span>
-        <span>
-          <i className="fp-legend-dot" /> Light off
-        </span>
-        <span>🌀 Fan spins when running</span>
+      <div className="fp-grid">
+        {ROOMS.map((room) => (
+          <RoomTile
+            key={room.id}
+            room={room.id}
+            name={room.name}
+            devices={snapshot.devices.filter((d) => d.room === room.id)}
+          />
+        ))}
       </div>
     </section>
   );
