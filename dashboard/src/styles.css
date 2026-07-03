@@ -1,0 +1,211 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #1c2230;
+  --border: #2a3140;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #f0b429;
+  --on: #3fb950;
+  --off: #484f58;
+  --alert: #f85149;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app__title {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.app__main {
+  margin-top: 20px;
+  display: grid;
+  gap: 20px;
+}
+
+.headline {
+  font-size: 1.3rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Connection pill */
+.conn {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.conn--live {
+  color: var(--on);
+  border-color: var(--on);
+}
+.conn--live::before {
+  content: "● ";
+}
+.conn--down {
+  color: var(--muted);
+}
+.conn--down::before {
+  content: "○ ";
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+.panel__title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Device status panel */
+.rooms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.room__name {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.devices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.device {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+}
+.device__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--off);
+}
+.device--on {
+  border-color: var(--on);
+}
+.device--on .device__dot {
+  background: var(--on);
+  box-shadow: 0 0 8px var(--on);
+}
+
+/* Power meter */
+.meter__total {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.meter__sub {
+  color: var(--muted);
+  margin: 6px 0 18px;
+}
+.bar {
+  margin-bottom: 12px;
+}
+.bar__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+.bar__track {
+  height: 10px;
+  background: var(--panel-2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #f6543e);
+  transition: width 0.4s ease;
+}
+
+/* Alerts panel */
+.alerts {
+  display: grid;
+  gap: 10px;
+}
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(248, 81, 73, 0.08);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+}
+.alert__icon {
+  color: var(--alert);
+}
+.alert__time {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.alerts__empty {
+  color: var(--muted);
+}
+
+/* Demo control */
+.demo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.btn:hover {
+  border-color: var(--accent);
+}
