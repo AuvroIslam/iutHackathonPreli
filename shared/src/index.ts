@@ -62,6 +62,21 @@ export const ROOMS: ReadonlyArray<{ id: RoomId; name: string }> = [
 /** Office hours (local), used by the alerts engine. */
 export const OFFICE_HOURS = { openHour: 9, closeHour: 17 } as const;
 
+/** Hours a room must be fully on before it raises a "left on" alert. */
+export const CONTINUOUS_ON_HOURS = 2;
+
+export type AlertType = "after-hours" | "room-left-on";
+
+export interface Alert {
+  /** Stable de-duplication key, e.g. "after-hours" or "room-left-on:work2". */
+  id: string;
+  type: AlertType;
+  room?: RoomId;
+  message: string;
+  /** ISO timestamp of when the alert was first raised. */
+  timestamp: string;
+}
+
 /** Socket.IO event names shared by the backend, dashboard and bot. */
 export const SOCKET_EVENTS = {
   stateUpdate: "state:update",
