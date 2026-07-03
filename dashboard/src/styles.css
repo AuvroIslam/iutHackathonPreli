@@ -190,6 +190,85 @@ body {
   color: var(--muted);
 }
 
+/* Floorplan */
+.fp {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.fp-room {
+  fill: #12161f;
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.fp-room-label {
+  fill: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.fp-dev-label {
+  fill: #6b7280;
+  font-size: 10px;
+}
+.fp-light {
+  fill: #3a3f4b;
+  stroke: #2a3140;
+  transition:
+    fill 0.3s ease,
+    filter 0.3s ease;
+}
+.fp-light--on {
+  fill: var(--accent);
+  filter: drop-shadow(0 0 7px var(--accent));
+}
+.fp-fan-blade {
+  fill: #9aa4b2;
+}
+.fp-fan-hub {
+  fill: #6b7280;
+}
+.fp-fan {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.fp-fan--on {
+  animation: fp-spin 0.9s linear infinite;
+}
+.fp-fan--on .fp-fan-blade {
+  fill: #cdd6e2;
+}
+@keyframes fp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-fan--on {
+    animation: none;
+  }
+}
+.fp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.fp-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3a3f4b;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.fp-legend-dot--on {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
 /* Demo control */
 .demo {
   display: flex;
