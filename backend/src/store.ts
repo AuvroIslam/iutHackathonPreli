@@ -73,4 +73,9 @@ export class OfficeStore extends EventEmitter {
   setTime(target: Date): void {
     this.clock.setTo(target);
   }
+
+  /** Demo mode: return the simulated clock to real time. */
+  resetTime(): void {
+    this.clock.reset();
+  }
 }

@@ -18,6 +18,7 @@ function isRoomId(value: string): value is RoomId {
 export function createApp(store: OfficeStore): Express {
   const app = express();
   app.use(cors());
+  app.use(express.json());
 
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok" });
@@ -50,6 +51,24 @@ export function createApp(store: OfficeStore): Express {
     const summary = roomSummaries(snapshot.devices).find((entry) => entry.room === room);
     const devices = snapshot.devices.filter((device) => device.room === room);
     res.json({ room, summary, devices, timestamp: snapshot.timestamp });
+  });
+
+  // Demo mode: warp the simulated clock so time-of-day alerts fire on cue.
+  app.post("/api/sim/settime", (req, res) => {
+    const hour: unknown = req.body?.hour;
+    if (typeof hour !== "number" || hour < 0 || hour > 23) {
+      res.status(400).json({ error: "Body must be { hour: 0-23 }" });
+      return;
+    }
+    const target = new Date();
+    target.setHours(hour, 0, 0, 0);
+    store.setTime(target);
+    res.json({ ok: true, now: store.snapshot().timestamp });
+  });
+
+  app.post("/api/sim/reset", (_req, res) => {
+    store.resetTime();
+    res.json({ ok: true, now: store.snapshot().timestamp });
   });
 
   return app;
