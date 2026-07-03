@@ -1,4 +1,5 @@
 import { AlertsPanel } from "./AlertsPanel";
+import { DemoControls } from "./DemoControls";
 import { DeviceStatusPanel } from "./DeviceStatusPanel";
 import { PowerMeter } from "./PowerMeter";
 import { useOfficeSocket } from "./useOfficeSocket";
@@ -16,6 +17,7 @@ export function App() {
       </header>
 
       <main className="app__main">
+        <DemoControls />
         {snapshot ? (
           <>
             <PowerMeter snapshot={snapshot} />
