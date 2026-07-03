@@ -1,9 +1,10 @@
+import { AlertsPanel } from "./AlertsPanel";
 import { DeviceStatusPanel } from "./DeviceStatusPanel";
 import { PowerMeter } from "./PowerMeter";
 import { useOfficeSocket } from "./useOfficeSocket";
 
 export function App() {
-  const { snapshot, connected } = useOfficeSocket();
+  const { snapshot, alerts, connected } = useOfficeSocket();
 
   return (
     <div className="app">
@@ -18,6 +19,7 @@ export function App() {
         {snapshot ? (
           <>
             <PowerMeter snapshot={snapshot} />
+            <AlertsPanel alerts={alerts} />
             <DeviceStatusPanel snapshot={snapshot} />
           </>
         ) : (
