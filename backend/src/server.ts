@@ -4,6 +4,11 @@ import { SOCKET_EVENTS, type Alert, type OfficeSnapshot } from "@office/shared";
 import { createApp } from "./app";
 import { OfficeStore } from "./store";
 
+// The office is in Asia/Dhaka (UTC+6). Pin the process timezone so the
+// after-hours alert logic uses local office hours even when the host (e.g.
+// Azure) runs in UTC. Must run before any Date is created. Override via TZ.
+process.env.TZ = process.env.TZ || "Asia/Dhaka";
+
 const PORT = Number(process.env.PORT ?? 4000);
 const TICK_MS = Number(process.env.SIM_TICK_MS ?? 6000);
 
