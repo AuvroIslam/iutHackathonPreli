@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { createServer } from "node:http";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { io } from "socket.io-client";
 import { SOCKET_EVENTS, type Alert } from "@office/shared";
@@ -11,6 +12,18 @@ if (!config.discordToken) {
     "[bot] DISCORD_TOKEN is not set. Copy bot/.env.example to bot/.env and add your bot token.",
   );
   process.exit(1);
+}
+
+// A Discord bot has no HTTP surface, but Azure App Service expects something
+// listening on its injected PORT or it treats the app as unhealthy and restarts
+// it. Expose a tiny health endpoint only when a PORT is provided (i.e. hosted).
+if (process.env.PORT) {
+  createServer((_req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("office-energy-bot ok");
+  }).listen(Number(process.env.PORT), () => {
+    console.log(`[bot] health server listening on :${process.env.PORT}`);
+  });
 }
 
 const client = new Client({
