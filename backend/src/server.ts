@@ -10,7 +10,7 @@ import { OfficeStore } from "./store";
 process.env.TZ = process.env.TZ || "Asia/Dhaka";
 
 const PORT = Number(process.env.PORT ?? 4000);
-const TICK_MS = Number(process.env.SIM_TICK_MS ?? 6000);
+const TICK_MS = Number(process.env.SIM_TICK_MS ?? 10000);
 
 const store = new OfficeStore();
 const app = createApp(store);
