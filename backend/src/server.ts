@@ -5,7 +5,7 @@ import { createApp } from "./app";
 import { OfficeStore } from "./store";
 
 const PORT = Number(process.env.PORT ?? 4000);
-const TICK_MS = Number(process.env.SIM_TICK_MS ?? 2500);
+const TICK_MS = Number(process.env.SIM_TICK_MS ?? 6000);
 
 const store = new OfficeStore();
 const app = createApp(store);

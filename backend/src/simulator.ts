@@ -9,7 +9,7 @@ export interface SimulateOptions {
   churnRate?: number;
 }
 
-const DEFAULT_CHURN_RATE = 0.3;
+const DEFAULT_CHURN_RATE = 0.15;
 
 /**
  * Probability a device should be ON, biased by room and hour of day.
