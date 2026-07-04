@@ -842,15 +842,62 @@ body {
   }
 }
 @media (max-width: 620px) {
+  .app {
+    padding: 14px 14px 28px;
+  }
+  .grid {
+    gap: 14px;
+  }
+  .card {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
   .byroom,
   .fp-grid {
     grid-template-columns: 1fr;
+  }
+  /* Shorter room tiles so the stacked floorplan isn't one long scroll. */
+  .fp-room {
+    aspect-ratio: 4 / 3;
   }
   .dsp__devices {
     grid-template-columns: repeat(3, 1fr);
   }
   .power__value {
     font-size: 3.2rem;
+  }
+
+  /* Tidy, compact top bar on phones. */
+  .topbar {
+    gap: 10px;
+  }
+  .brand__title {
+    font-size: 1.3rem;
+  }
+  .brand__mark {
+    width: 40px;
+    height: 40px;
+  }
+  .topbar__right {
+    gap: 8px;
+    width: 100%;
+  }
+  .updated {
+    font-size: 0.78rem;
+  }
+  .btn {
+    padding: 7px 11px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Very small phones: drop the seconds-ticking timestamp to save a line. */
+@media (max-width: 400px) {
+  .updated {
+    display: none;
+  }
+  .dsp__devices {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (prefers-reduced-motion: reduce) {
