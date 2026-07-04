@@ -43,7 +43,7 @@ export function detectAlerts(devices: Device[], now: Date): Alert[] {
   const hour = now.getHours();
   const afterHours = hour < OFFICE_HOURS.openHour || hour >= OFFICE_HOURS.closeHour;
 
-  // Rule A: anything left on outside office hours.
+  // Rule A: devices left on *after office hours* (time-dependent).
   const onCount = devices.filter((device) => device.status === "on").length;
   if (afterHours && onCount > 0) {
     alerts.push({
@@ -55,6 +55,7 @@ export function detectAlerts(devices: Device[], now: Date): Alert[] {
   }
 
   // Rule B: a room where every device has been on continuously for > 2 hours.
+  // This is a genuine anomaly at any time of day, so it is not time-gated.
   for (const room of ROOMS) {
     const inRoom = devices.filter((device) => device.room === room.id);
     if (inRoom.length === 0) {
@@ -92,7 +93,12 @@ export class AlertsEngine {
     const raised: Alert[] = [];
 
     for (const alert of current) {
-      if (!this.active.has(alert.id)) {
+      const existing = this.active.get(alert.id);
+      if (existing) {
+        // Already active: keep the original raise time, but refresh the message
+        // to the live state so the panel always matches the current devices.
+        this.active.set(alert.id, { ...alert, timestamp: existing.timestamp });
+      } else {
         this.active.set(alert.id, alert);
         raised.push(alert);
       }

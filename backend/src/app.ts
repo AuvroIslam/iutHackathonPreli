@@ -63,16 +63,19 @@ export function createApp(store: OfficeStore): Express {
     const target = new Date();
     target.setHours(hour, 0, 0, 0);
     store.setTime(target);
-    // Stage a realistic end-of-day "room left on" so the demo reliably shows the
-    // room-left-on alert; the room then churns normally (nothing stays pinned).
-    store.leaveRoomOn();
-    store.refresh(); // reflect the warped/staged state immediately
     res.json({ ok: true, now: store.snapshot().timestamp });
   });
 
   app.post("/api/sim/reset", (_req, res) => {
-    store.resetTime();
+    store.reset();
     res.json({ ok: true, now: store.snapshot().timestamp });
+  });
+
+  // "Run demo": behave like normal office hours (churn, no alerts), auto-resets.
+  app.post("/api/sim/demo", (_req, res) => {
+    const durationMs = 3 * 60 * 1000;
+    store.runDemo(durationMs);
+    res.json({ ok: true, durationMs, now: store.snapshot().timestamp });
   });
 
   return app;

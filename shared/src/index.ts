@@ -37,6 +37,8 @@ export interface OfficeSnapshot {
   totalWatts: number;
   rooms: RoomSummary[];
   todayKwh: number;
+  /** Currently active alerts, so the dashboard stays consistent with devices. */
+  alerts: Alert[];
   timestamp: string;
 }
 

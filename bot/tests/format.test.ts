@@ -22,7 +22,7 @@ function device(
 }
 
 function snapshot(devices: Device[]): OfficeSnapshot {
-  return { devices, totalWatts: 0, rooms: [], todayKwh: 0, timestamp: now };
+  return { devices, totalWatts: 0, rooms: [], todayKwh: 0, alerts: [], timestamp: now };
 }
 
 describe("formatStatus", () => {

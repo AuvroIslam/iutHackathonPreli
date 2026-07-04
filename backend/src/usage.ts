@@ -34,6 +34,14 @@ export class UsageAccumulator {
     this.lastAt = now;
   }
 
+  /**
+   * Move the integration anchor to `now` without accumulating. Called when the
+   * demo clock is warped, so a time jump doesn't add a spurious chunk of usage.
+   */
+  resync(now: Date): void {
+    this.lastAt = now;
+  }
+
   /** Energy used so far today, in kilowatt-hours. */
   get kwh(): number {
     return this.wattHours / 1000;

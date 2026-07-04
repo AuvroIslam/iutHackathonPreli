@@ -33,7 +33,7 @@ describe("detectAlerts", () => {
     expect(alerts.some((a) => a.id === "after-hours")).toBe(false);
   });
 
-  it("raises room-left-on only when all room devices exceed 2 h", () => {
+  it("raises room-left-on regardless of the time of day (even during office hours)", () => {
     const now = at(11);
     expect(detectAlerts(roomOnFor("work2", 3, now), now).some((a) => a.id === "room-left-on:work2")).toBe(
       true,

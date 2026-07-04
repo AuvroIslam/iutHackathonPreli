@@ -11,39 +11,38 @@ export interface SimulateOptions {
 
 const DEFAULT_CHURN_RATE = 0.15;
 
-// After hours a "forgotten" on-device has this small chance to be switched off
-// each time it is reconsidered — low, so devices left on persist (and can trip
-// the >2h "room left on" alert), while the occasional one flicks off for realism.
-const AFTER_HOURS_TURN_OFF_CHANCE = 0.08;
-
 /**
  * Probability a device is ON during office hours, by room. Work rooms are busy;
- * the drawing room (a waiting area) is only intermittently used. After hours is
- * handled separately in {@link simulateTick} — nothing powers on by itself once
- * everyone has left.
+ * the drawing room (a waiting area) is only intermittently used.
  */
 function officeHoursOnProbability(device: Device): number {
   return device.room === "drawing" ? 0.35 : 0.85;
 }
 
 /**
- * Advance the simulation by one tick. Each device has a chance to reconsider its
- * state. During office hours people come and go, so devices churn on/off. After
- * hours nobody arrives to switch anything on: off devices stay off, and devices
- * left on are "forgotten" — they mostly stay on (keeping their original
- * `lastChanged`, so a fully-on room can eventually trip the 2-hour alert), with
- * the occasional one switched off by someone heading out. `lastChanged` is only
- * updated for devices whose status actually flips.
+ * Advance the simulation by one tick.
+ *
+ * During office hours (9 AM–5 PM by the clock) people come and go, so devices
+ * churn on/off. Outside office hours the office is empty — nobody is there to
+ * switch anything on or off — so the state is **frozen**: whatever was left on
+ * stays on (the anomaly the alerts catch) and off stays off. `lastChanged` only
+ * updates when a device actually flips.
  */
 export function simulateTick(
   devices: Device[],
   now: Date,
   options: SimulateOptions = {},
 ): { devices: Device[]; changed: string[] } {
-  const rng = options.rng ?? Math.random;
-  const churnRate = options.churnRate ?? DEFAULT_CHURN_RATE;
   const hour = now.getHours();
   const officeHours = hour >= OFFICE_HOURS.openHour && hour < OFFICE_HOURS.closeHour;
+
+  // After hours: frozen — the office stays exactly as it was left.
+  if (!officeHours) {
+    return { devices, changed: [] };
+  }
+
+  const rng = options.rng ?? Math.random;
+  const churnRate = options.churnRate ?? DEFAULT_CHURN_RATE;
   const timestamp = now.toISOString();
   const changed: string[] = [];
 
@@ -51,18 +50,7 @@ export function simulateTick(
     if (rng() >= churnRate) {
       return device;
     }
-
-    let desired: DeviceStatus;
-    if (officeHours) {
-      desired = rng() < officeHoursOnProbability(device) ? "on" : "off";
-    } else if (device.status === "on") {
-      // Forgotten-on: mostly stays on, occasionally switched off on the way out.
-      desired = rng() < AFTER_HOURS_TURN_OFF_CHANCE ? "off" : "on";
-    } else {
-      // Off stays off after hours — nothing turns on by itself.
-      desired = "off";
-    }
-
+    const desired: DeviceStatus = rng() < officeHoursOnProbability(device) ? "on" : "off";
     if (desired === device.status) {
       return device;
     }
