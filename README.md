@@ -13,9 +13,9 @@ _Editable source: [draw.io file](https://drive.google.com/file/d/1Zz894QOD175mB1
 ## Highlights
 
 - **One backend, one source of truth.** A Node/TS process simulates 15 devices, tracks energy use, raises alerts, serves REST, and broadcasts every change over Socket.IO. The dashboard and bot only ever read from it.
-- **Real-time dashboard (no refresh).** Live device panel, power meter with per-room breakdown, timestamped alerts, and a top-view **floorplan where lights glow and fans spin**.
+- **Real-time dashboard (no refresh).** Live device panel, power meter with per-room breakdown, timestamped alerts (devices on after hours, or a room left fully on > 2 h), and a top-view **floorplan where lights glow and fans spin**.
 - **Discord bot on real data.** `!status`, `!room`, `!usage` answered from the live backend, humanized by an optional LLM (with a template fallback), plus proactive after-hours alert posts.
-- **Demo mode.** Warp the simulated clock to 10 PM to trigger the after-hours alert on cue.
+- **Time-aware simulation.** Devices churn during office hours (9 AM–5 PM) and **freeze after hours**, with alerts flagging anything left on. Demo controls let you replay office hours, warp to 10 PM, or reset to real time on demand.
 
 ## Live deployment
 
@@ -43,6 +43,20 @@ Tip: click **Warp to 10 PM** on the dashboard to make the bot post a proactive a
 - **Backend** and **bot** are each bundled with [esbuild](https://esbuild.dev) (`npm run build`) into a single self-contained file, then run on **Azure App Service** (Linux, Node 22) — startup commands `node backend/dist/server.js` and `node bot/dist/index.js`. The bot has no web UI, so it also serves a tiny HTTP health endpoint on Azure's port to stay "healthy" and avoid restart loops. Both share one App Service Plan and auto-deploy from `main` via **GitHub Actions**.
 - **Dashboard** deploys to **Vercel** from the repo root ([`vercel.json`](vercel.json)); its `VITE_BACKEND_URL` build var points at the Azure backend (Socket.IO + REST are same-origin locally via the Vite proxy, cross-origin in prod — CORS is open on the backend).
 - **Secrets** (Discord token, Groq / OpenAI keys) live only as host env vars / Azure **App Settings** — never committed. `.env` files stay local and git-ignored.
+
+## Demo controls (for reviewers)
+
+The dashboard has three buttons (top bar) so you can drive the simulation on demand — no need to wait for the real clock:
+
+| Button | What it does |
+| --- | --- |
+| **▶ Run demo** | Replays a normal **9 AM–5 PM office**: devices toggle on/off **live** (no alerts). Runs for 3 minutes with a countdown, then auto-resets. _Shown only when it's currently after hours._ |
+| **Warp to 10 PM** | Jumps to after-hours — the office **freezes** and the **Active Alerts** panel flags anything left on (and the Discord bot posts a proactive nudge). |
+| **Reset clock** | Returns to the real current time; alerts then follow the real hour. |
+
+> **⚠️ If the dashboard looks "still", that's by design.** After 5 PM the office is **intentionally frozen** — in real life nobody is in the office to switch lights or fans on or off, so devices hold their last state. That's exactly what makes *"left on after hours"* an anomaly worth flagging. So if you open the live dashboard in the evening and nothing is toggling, it is **not broken**.
+>
+> **To see the real-time toggling, click ▶ Run demo.** It replays the busy office-hours behaviour, so you can watch devices flip on/off live and the power meter + floorplan update in real time — exactly the real-time behaviour being evaluated. Then **Warp to 10 PM** to see the alerts (and the bot post) fire on cue.
 
 ## The office (fixed)
 
@@ -88,7 +102,7 @@ npm run dev -w @office/backend      # http://localhost:4000  (REST + Socket.IO +
 npm run dev -w @office/dashboard    # http://localhost:5173  (proxies /api + socket to backend)
 ```
 
-Open **http://localhost:5173**. Devices flicker live; click **Warp to 10 PM** to trigger an after-hours alert.
+Open **http://localhost:5173**. During office hours devices toggle live; after 5 PM the office freezes and flags anything left on. Drive it with the demo buttons — **Run demo** (office-hours simulation, shown after hours), **Warp to 10 PM**, and **Reset clock**.
 
 ### Discord bot (optional — needs a token)
 
@@ -112,7 +126,7 @@ Backend (`backend/.env`, optional):
 | Var           | Default | Purpose                       |
 | ------------- | ------- | ----------------------------- |
 | `PORT`        | `4000`  | HTTP/Socket.IO port           |
-| `SIM_TICK_MS` | `2500`  | Simulation tick interval (ms) |
+| `SIM_TICK_MS` | `8000`  | Simulation tick interval, ms (office-hours toggling cadence) |
 
 Bot (`bot/.env`):
 
@@ -138,9 +152,10 @@ Bot (`bot/.env`):
 | `GET /api/room/:room`   | One room (`drawing` / `work1` / `work2`); 404 otherwise |
 | `GET /api/usage`        | Current total W + today's estimated kWh                 |
 | `GET /api/alerts`       | Active alerts                                           |
-| `POST /api/sim/settime` | Demo mode: `{ "hour": 0-23 }` warps the simulated clock |
-| `POST /api/sim/reset`   | Demo mode: return to real time                          |
-| socket `state:update`   | Full snapshot pushed every tick                         |
+| `POST /api/sim/settime` | Demo: `{ "hour": 0-23 }` warps the clock (10 PM → frozen + alerts) |
+| `POST /api/sim/demo`    | Demo: simulate office hours (toggling, no alerts) for 3 min, then auto-reset |
+| `POST /api/sim/reset`   | Demo: return to real time                              |
+| socket `state:update`   | Full snapshot (devices + alerts) pushed every tick     |
 | socket `alert:new`      | Pushed when an alert is raised                          |
 
 ## Scripts
