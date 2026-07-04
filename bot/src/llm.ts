@@ -3,17 +3,30 @@ import { config } from "./config";
 const SYSTEM_PROMPT =
   "You are a warm, friendly office assistant for a small company, chatting with the boss on Discord. " +
   "Rewrite the given facts as a short, natural, conversational reply (1-2 sentences). " +
-  "Keep every number and room name exactly as given. No markdown headings, no bullet lists.";
+  "STRICT RULES: Only rephrase the exact facts you are given. Never invent, add, guess or " +
+  "embellish any rooms, device names, numbers, times, equipment (e.g. PCs, ACs) or people that " +
+  "are not explicitly in the text. Keep every number, room name and device type exactly as given, " +
+  "and do not introduce specifics (like room numbers) that were not provided. " +
+  "No markdown headings, no bullet lists.";
 
-async function callGroq(facts: string): Promise<string> {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+/**
+ * Call an OpenAI-compatible chat-completions endpoint (Groq and OpenAI share
+ * the same request/response shape) and return the assistant's text.
+ */
+async function chatComplete(
+  url: string,
+  apiKey: string,
+  model: string,
+  facts: string,
+): Promise<string> {
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${config.llm.apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: config.llm.model || "llama-3.1-8b-instant",
+      model,
       temperature: 0.7,
       max_tokens: 200,
       messages: [
@@ -23,53 +36,38 @@ async function callGroq(facts: string): Promise<string> {
     }),
   });
   if (!res.ok) {
-    throw new Error(`Groq responded ${res.status}`);
+    throw new Error(`${res.status} ${res.statusText}`);
   }
   const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) {
-    throw new Error("Groq returned an empty response");
+    throw new Error("empty response");
   }
   return text;
 }
 
-async function callGemini(facts: string): Promise<string> {
-  const model = config.llm.model || "gemini-1.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.llm.apiKey}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: "user", parts: [{ text: facts }] }],
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Gemini responded ${res.status}`);
-  }
-  const data = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-  if (!text) {
-    throw new Error("Gemini returned an empty response");
-  }
-  return text;
-}
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
 /**
- * Rephrase factual text into a friendly reply using the configured LLM. Falls
- * back to the raw facts when no provider/key is set or the call fails, so the
- * bot always answers with correct data even without an API key.
+ * Rephrase factual text into a friendly reply. Tries Groq first, then OpenAI,
+ * then falls back to the raw facts (deterministic template) — so the bot always
+ * answers with correct data even when a provider is missing, down or rate-limited.
  */
 export async function humanize(facts: string): Promise<string> {
-  if (config.llm.provider === "none" || !config.llm.apiKey) {
-    return facts;
+  if (config.groq.apiKey) {
+    try {
+      return await chatComplete(GROQ_URL, config.groq.apiKey, config.groq.model, facts);
+    } catch (error) {
+      console.warn("[bot] Groq failed, falling back to OpenAI:", (error as Error).message);
+    }
   }
-  try {
-    return config.llm.provider === "groq" ? await callGroq(facts) : await callGemini(facts);
-  } catch (error) {
-    console.warn("[bot] LLM humanize failed, using template:", (error as Error).message);
-    return facts;
+  if (config.openai.apiKey) {
+    try {
+      return await chatComplete(OPENAI_URL, config.openai.apiKey, config.openai.model, facts);
+    } catch (error) {
+      console.warn("[bot] OpenAI failed, using template:", (error as Error).message);
+    }
   }
+  return facts;
 }

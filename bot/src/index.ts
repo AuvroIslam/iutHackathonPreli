@@ -46,7 +46,7 @@ socket.on(SOCKET_EVENTS.alertNew, (alert: Alert) => {
   void (async () => {
     const channel = await client.channels.fetch(config.alertChannelId).catch(() => null);
     if (channel && "send" in channel) {
-      const text = await humanize(`${alert.message} It is currently after office hours.`);
+      const text = await humanize(alert.message);
       await channel.send(`⚠️ ${text}`);
     }
   })();

@@ -10,6 +10,28 @@ function hoursSince(iso: string, now: Date): number {
   return (now.getTime() - new Date(iso).getTime()) / 3_600_000;
 }
 
+/** Human summary of which rooms/devices are on, e.g. "Work Room 2 (1 fan, 2 lights)". */
+function summarizeOn(devices: Device[]): string {
+  const parts: string[] = [];
+  for (const room of ROOMS) {
+    const on = devices.filter((device) => device.room === room.id && device.status === "on");
+    if (on.length === 0) {
+      continue;
+    }
+    const fans = on.filter((device) => device.type === "fan").length;
+    const lights = on.filter((device) => device.type === "light").length;
+    const bits: string[] = [];
+    if (fans > 0) {
+      bits.push(`${fans} fan${fans === 1 ? "" : "s"}`);
+    }
+    if (lights > 0) {
+      bits.push(`${lights} light${lights === 1 ? "" : "s"}`);
+    }
+    parts.push(`${room.name} (${bits.join(", ")})`);
+  }
+  return parts.join(", ");
+}
+
 /**
  * Pure detection of every alert condition that currently holds, given the live
  * devices and the current time. Timestamps are set to `now`; the engine below
@@ -27,7 +49,7 @@ export function detectAlerts(devices: Device[], now: Date): Alert[] {
     alerts.push({
       id: "after-hours",
       type: "after-hours",
-      message: `${onCount} device(s) still on after office hours.`,
+      message: `${onCount} device${onCount === 1 ? "" : "s"} still on after office hours — ${summarizeOn(devices)}.`,
       timestamp,
     });
   }

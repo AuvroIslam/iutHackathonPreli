@@ -88,10 +88,13 @@ Bot (`bot/.env`):
 |---|---|---|
 | `DISCORD_TOKEN` | — | **Required** to connect. Also enable the **Message Content** intent in the Discord Developer Portal. |
 | `DISCORD_ALERT_CHANNEL_ID` | — | Channel for proactive alert posts |
-| `BACKEND_URL` | `http://localhost:4000` | Where the shared backend lives |
-| `LLM_PROVIDER` | `none` | `none` \| `groq` \| `gemini` |
-| `LLM_API_KEY` | — | Key for the chosen provider (omit to use templates) |
-| `LLM_MODEL` | provider default | e.g. `llama-3.1-8b-instant`, `gemini-1.5-flash` |
+| `BACKEND_URL` | `http://localhost:4000` | Where the shared backend lives (use the hosted URL in prod) |
+| `GROQ_API_KEY` | — | Enables Groq (tried first). Omit to skip. |
+| `GROQ_MODEL` | `llama-3.1-8b-instant` | Groq model override |
+| `OPENAI_API_KEY` | — | Enables OpenAI (fallback if Groq fails). Omit to skip. |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model override |
+
+The humanizer tries **Groq → OpenAI → built-in templates**, so the bot always replies with correct data even with no keys set.
 
 `.env` files are git-ignored; only the `.env.example` templates are committed.
 
