@@ -23,9 +23,20 @@ _Editable source: [draw.io file](https://drive.google.com/file/d/1Zz894QOD175mB1
 | ------------- | ----------------- | -------------------------------------------------------------------------------------- |
 | Web dashboard | Vercel            | **https://techathon-dash.vercel.app**                                                  |
 | Backend API   | Azure App Service | https://office-energy-monitor-auvro-b2gyh6g4f9h6f5bg.centralindia-01.azurewebsites.net |
-| Discord bot   | Azure App Service | headless (Discord + an internal health endpoint)                                       |
+| Discord bot   | Azure App Service | **Join & try it:** https://discord.gg/7YDYzM5Bb (headless; also serves a health endpoint) |
 
 All three read from the **one** backend, so the dashboard and the bot always agree.
+
+**Try the bot:** join the [Discord server](https://discord.gg/7YDYzM5Bb) and type — replies come from the same live backend the dashboard uses:
+
+```
+!status                      # whole-office summary, all 3 rooms
+!room work1                  # one room (aliases: drawing / work1 / work2)
+!usage                       # current watts + today's kWh
+!help                        # list commands
+```
+
+Tip: click **Warp to 10 PM** on the dashboard to make the bot post a proactive after-hours alert.
 
 **How it's wired**
 
