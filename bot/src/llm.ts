@@ -8,15 +8,23 @@ const SYSTEM_PROMPT =
   "guess any rooms, device names, numbers, times, equipment (e.g. PCs, ACs) or people that are not " +
   "in the text, and do not introduce specifics (like room numbers) that were not provided. " +
   "Keep it conversational (one short clause per room is fine) — completeness matters more than " +
-  "brevity. No markdown headings, no bullet lists.";
+  "brevity. Vary your opening and wording every time — never start two replies with the same " +
+  "sentence; a preamble is optional, you may lead straight with the first room. When a room is all " +
+  "off, say it is off (fans and lights), not merely \"dark\". No markdown headings, no bullet lists.";
 
-// A worked example (few-shot) so the model copies the "cover every room with its
-// exact count, conversationally" pattern instead of paraphrasing numbers away.
-const EXAMPLE_FACTS =
+// Two worked examples (few-shot) with different openings so the model copies the
+// "cover every room with its exact count, conversationally" pattern — and learns
+// to vary its phrasing rather than reusing one stock intro.
+const EXAMPLE_FACTS_1 =
   "Drawing Room: 1 fan ON, 2 lights ON.\nWork Room 1: all off.\nWork Room 2: 2 fans ON, 3 lights ON.";
-const EXAMPLE_REPLY =
+const EXAMPLE_REPLY_1 =
   "Here's the office right now, boss — the Drawing Room has 1 fan and 2 lights on, Work Room 1 is " +
   "completely off, and Work Room 2 is busy with 2 fans and 3 lights running.";
+const EXAMPLE_FACTS_2 =
+  "Drawing Room: all off.\nWork Room 1: 1 fan ON, 3 lights ON.\nWork Room 2: 2 fans ON, 2 lights ON.";
+const EXAMPLE_REPLY_2 =
+  "The Drawing Room is all switched off, Work Room 1 is running 1 fan and 3 lights, and Work Room 2 " +
+  "has 2 fans and 2 lights on.";
 
 /**
  * Call an OpenAI-compatible chat-completions endpoint (Groq and OpenAI share
@@ -36,12 +44,14 @@ async function chatComplete(
     },
     body: JSON.stringify({
       model,
-      temperature: 0.3,
+      temperature: 0.55,
       max_tokens: 220,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: EXAMPLE_FACTS },
-        { role: "assistant", content: EXAMPLE_REPLY },
+        { role: "user", content: EXAMPLE_FACTS_1 },
+        { role: "assistant", content: EXAMPLE_REPLY_1 },
+        { role: "user", content: EXAMPLE_FACTS_2 },
+        { role: "assistant", content: EXAMPLE_REPLY_2 },
         { role: "user", content: facts },
       ],
     }),
