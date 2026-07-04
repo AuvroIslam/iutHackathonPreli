@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import type { Alert, Device, OfficeSnapshot, RoomId } from "@office/shared";
+import { CONTINUOUS_ON_HOURS, type Alert, type Device, type OfficeSnapshot, type RoomId } from "@office/shared";
 import { roomSummaries, totalWatts } from "./aggregation";
 import { createInitialDevices } from "./devices";
 import { simulateTick } from "./simulator";
@@ -9,26 +9,17 @@ import { UsageAccumulator } from "./usage";
 
 const round = (value: number, dp: number): number => Number(value.toFixed(dp));
 
-/**
- * The demo's designated "left on" room: it starts fully on and is never toggled
- * by the simulator, so once its devices have been on > 2 h — or the clock is
- * warped past that with "Warp to 10 PM" — it reliably raises the room-left-on
- * alert alongside the after-hours one.
- */
-const LEFT_ON_ROOM: RoomId = "work2";
+/** Room the demo "Warp to 10 PM" control stages as "left on" (see leaveRoomOn). */
+const DEMO_LEFT_ON_ROOM: RoomId = "work2";
 
 /**
  * Realistic starting mix so the office is never blank at startup — most work
- * devices on, the drawing room intermittent, and LEFT_ON_ROOM fully on. If the
- * process happens to start after hours, these become the "left on" devices the
- * alerts engine catches (rather than an all-off office that nothing would ever
- * switch on again).
+ * devices on, the drawing room intermittent. If the process happens to start
+ * after hours, these become the "left on" devices the alerts engine catches
+ * (rather than an all-off office that nothing would ever switch on again).
  */
 function seedInitialDevices(now: Date): Device[] {
   return createInitialDevices(now).map((device) => {
-    if (device.room === LEFT_ON_ROOM) {
-      return { ...device, status: "on" as const };
-    }
     const pOn = device.room === "drawing" ? 0.3 : 0.7;
     return Math.random() < pOn ? { ...device, status: "on" as const } : device;
   });
@@ -67,11 +58,17 @@ export class OfficeStore extends EventEmitter {
   tick(): OfficeSnapshot {
     const now = this.clock.now();
     this.usage.update(this.devices, now);
-    const prev = this.devices;
-    const next = simulateTick(prev, now).devices;
-    // Keep the designated "left on" room fully on across ticks (its devices keep
-    // their original lastChanged) so it reliably trips the > 2 h room alert.
-    this.devices = next.map((device, i) => (device.room === LEFT_ON_ROOM ? prev[i] : device));
+    this.devices = simulateTick(this.devices, now).devices;
+    return this.refresh();
+  }
+
+  /**
+   * Evaluate alerts on the current state and broadcast a snapshot, without
+   * advancing the simulation. Used by tick(), and by demo mode so a warped /
+   * staged state is reflected on the dashboard and bot immediately.
+   */
+  refresh(): OfficeSnapshot {
+    const now = this.clock.now();
     const { raised } = this.alerts.evaluate(this.devices, now);
     const snapshot = this.snapshot();
     this.emit("update", snapshot);
@@ -106,5 +103,19 @@ export class OfficeStore extends EventEmitter {
   /** Demo mode: return the simulated clock to real time. */
   resetTime(): void {
     this.clock.reset();
+  }
+
+  /**
+   * Demo mode: stage a realistic "left on" room — turn all its devices on and
+   * backdate their lastChanged past the 2-hour threshold, so it trips the
+   * room-left-on alert on cue. The simulator then churns the room normally from
+   * here (nothing stays pinned).
+   */
+  leaveRoomOn(room: RoomId = DEMO_LEFT_ON_ROOM): void {
+    const agedMs = this.clock.now().getTime() - (CONTINUOUS_ON_HOURS + 1) * 3_600_000;
+    const aged = new Date(agedMs).toISOString();
+    this.devices = this.devices.map((device) =>
+      device.room === room ? { ...device, status: "on", lastChanged: aged } : device,
+    );
   }
 }

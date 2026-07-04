@@ -63,6 +63,10 @@ export function createApp(store: OfficeStore): Express {
     const target = new Date();
     target.setHours(hour, 0, 0, 0);
     store.setTime(target);
+    // Stage a realistic end-of-day "room left on" so the demo reliably shows the
+    // room-left-on alert; the room then churns normally (nothing stays pinned).
+    store.leaveRoomOn();
+    store.refresh(); // reflect the warped/staged state immediately
     res.json({ ok: true, now: store.snapshot().timestamp });
   });
 
