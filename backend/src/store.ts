@@ -10,6 +10,19 @@ import { UsageAccumulator } from "./usage";
 const round = (value: number, dp: number): number => Number(value.toFixed(dp));
 
 /**
+ * Realistic starting mix so the office is never blank at startup — most work
+ * devices on, the drawing room intermittent. If the process happens to start
+ * after hours, these become the "left on" devices the alerts engine catches
+ * (rather than an all-off office that nothing would ever switch on again).
+ */
+function seedInitialDevices(now: Date): Device[] {
+  return createInitialDevices(now).map((device) => {
+    const pOn = device.room === "drawing" ? 0.3 : 0.7;
+    return Math.random() < pOn ? { ...device, status: "on" as const } : device;
+  });
+}
+
+/**
  * In-memory single source of truth for office device state. Holds the devices,
  * the usage accumulator and a clock; advances the simulation on an interval and
  * emits an "update" event with a fresh snapshot after every tick. Both the web
@@ -24,7 +37,7 @@ export class OfficeStore extends EventEmitter {
 
   constructor(now: Date = new Date()) {
     super();
-    this.devices = createInitialDevices(now);
+    this.devices = seedInitialDevices(now);
     this.usage = new UsageAccumulator(now);
   }
 
