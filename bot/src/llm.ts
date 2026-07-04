@@ -10,6 +10,14 @@ const SYSTEM_PROMPT =
   "Keep it conversational (one short clause per room is fine) — completeness matters more than " +
   "brevity. No markdown headings, no bullet lists.";
 
+// A worked example (few-shot) so the model copies the "cover every room with its
+// exact count, conversationally" pattern instead of paraphrasing numbers away.
+const EXAMPLE_FACTS =
+  "Drawing Room: 1 fan ON, 2 lights ON.\nWork Room 1: all off.\nWork Room 2: 2 fans ON, 3 lights ON.";
+const EXAMPLE_REPLY =
+  "Here's the office right now, boss — the Drawing Room has 1 fan and 2 lights on, Work Room 1 is " +
+  "completely off, and Work Room 2 is busy with 2 fans and 3 lights running.";
+
 /**
  * Call an OpenAI-compatible chat-completions endpoint (Groq and OpenAI share
  * the same request/response shape) and return the assistant's text.
@@ -28,10 +36,12 @@ async function chatComplete(
     },
     body: JSON.stringify({
       model,
-      temperature: 0.7,
-      max_tokens: 200,
+      temperature: 0.3,
+      max_tokens: 220,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: EXAMPLE_FACTS },
+        { role: "assistant", content: EXAMPLE_REPLY },
         { role: "user", content: facts },
       ],
     }),
