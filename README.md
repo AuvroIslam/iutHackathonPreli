@@ -2,7 +2,7 @@
 
 Monitor a small office's lights and fans through a **live web dashboard** and a **Discord bot**, both backed by a **single shared backend** that is the one source of truth for device state. Built for the Techathon Nationals & Rover Summit preliminary round.
 
-![System data flow](./docs/system-diagram.svg)
+![Office Energy Monitor — System Diagram](./GithubImages/SystemDiagram.drawio%28tranparent%29.png)
 
 ## Highlights
 
@@ -21,7 +21,7 @@ Monitor a small office's lights and fans through a **live web dashboard** and a 
 [Simulated Device Layer] → [Backend API] → [ Web Dashboard ] && [ Discord Bot ]
 ```
 
-The simulator and device state live **only in the backend**. See the full picture in [`docs/system-diagram.svg`](./docs/system-diagram.svg).
+The simulator and device state live **only in the backend**. See the full picture in the [system diagram](./GithubImages/SystemDiagram.drawio%28tranparent%29.png).
 
 - **Backend** — Node.js + TypeScript, Express (REST) + Socket.IO. In-memory simulator, alerts engine, usage accumulator.
 - **Dashboard** — React + Vite + TypeScript, live over Socket.IO.
