@@ -53,7 +53,7 @@ shared/      # @office/shared — Device/Alert types, room + wattage constants, 
 backend/     # Express + Socket.IO + simulator + alerts + usage accumulator
 dashboard/   # React + Vite dashboard (floorplan, power meter, alerts, device panel)
 bot/         # discord.js bot (!status/!room/!usage, proactive alerts, LLM humanizer)
-docs/        # HARDWARE.md — ESP32 / Wokwi schematic guide
+docs/        # HARDWARE.md + wokwi/ (runnable ESP32 circuit: diagram.json, sketch.ino)
 GithubImages/# system diagram (draw.io export) embedded in this README
 prd.md       # product requirements / build spec
 ```
@@ -141,7 +141,15 @@ npm run format   # prettier --write
 
 ## Hardware / schematic
 
-The concept ESP32 circuit (pin mapping, electrical reasoning, Wokwi build steps) lives in [`docs/HARDWARE.md`](./docs/HARDWARE.md). No physical hardware is needed for the demo.
+A **runnable Wokwi circuit** models one representative room (Work Room 1: 3 lights + 2 fans): an ESP32 senses each device's on/off state and the room's aggregate current, then prints a JSON snapshot in the backend's `Device` shape — the "device layer → backend" edge of the system diagram.
+
+- ▶️ **Live simulation:** https://wokwi.com/projects/468606509313864705
+- 📁 **Project files:** [`docs/wokwi/`](./docs/wokwi/) — [`diagram.json`](./docs/wokwi/diagram.json) (circuit), [`sketch.ino`](./docs/wokwi/sketch.ino) (firmware), [`README`](./docs/wokwi/README.md) (BOM, pin map, wiring, electrical reasoning)
+- 📐 **Design & reasoning:** [`docs/HARDWARE.md`](./docs/HARDWARE.md)
+
+![Wokwi schematic](./docs/wokwi-schematic.png)
+
+Pins: lights → GPIO 25/26/27, fans → GPIO 32/33 (all `INPUT_PULLDOWN`), room current → GPIO 34 (ADC). No physical hardware is needed — it runs entirely in simulation.
 
 ## Reference docs
 

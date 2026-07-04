@@ -2,6 +2,12 @@
 
 This is a **simulation/concept only** — no physical hardware is required for the demo. The circuit below shows how the office devices *would* be wired and sensed in real life, and is representative of **one room** (2 fans + 3 lights). The other two rooms replicate the same pattern.
 
+> **▶️ Runnable circuit:** this design is built and simulating at
+> **https://wokwi.com/projects/468606509313864705**. The exported project lives in
+> [`./wokwi/`](./wokwi/) — paste [`diagram.json`](./wokwi/diagram.json) and
+> [`sketch.ino`](./wokwi/sketch.ino) into a new Wokwi ESP32 project and press ▶,
+> or see [`wokwi/README.md`](./wokwi/README.md) for the full BOM, net list and demo steps.
+
 Build it in **[Wokwi](https://wokwi.com)** (recommended — it simulates the ESP32 with Wi‑Fi) and export a screenshot + share link into this folder.
 
 ## Concept
