@@ -2,6 +2,10 @@
 
 Monitor a small office's lights and fans through a **live web dashboard** and a **Discord bot**, both backed by a **single shared backend** that is the one source of truth for device state. Built for the Techathon Nationals & Rover Summit preliminary round.
 
+![Office Energy Monitor — live dashboard](./GithubImages/dashboard.png)
+
+> **Live dashboard:** https://techathon-dash.vercel.app — real-time power, per-room breakdown, top-view floorplan (lights glow, fans spin), device status and alerts.
+
 ![Office Energy Monitor — System Diagram](./GithubImages/SystemDiagram.drawio.png)
 
 _Editable source: [draw.io file](https://drive.google.com/file/d/1Zz894QOD175mB1b6Pxd9l28LW-5Kj_r9/view?usp=sharing)_
