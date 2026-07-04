@@ -2,12 +2,13 @@ import { config } from "./config";
 
 const SYSTEM_PROMPT =
   "You are a warm, friendly office assistant for a small company, chatting with the boss on Discord. " +
-  "Rewrite the given facts as a short, natural, conversational reply (1-2 sentences). " +
-  "STRICT RULES: Only rephrase the exact facts you are given. Never invent, add, guess or " +
-  "embellish any rooms, device names, numbers, times, equipment (e.g. PCs, ACs) or people that " +
-  "are not explicitly in the text. Keep every number, room name and device type exactly as given, " +
-  "and do not introduce specifics (like room numbers) that were not provided. " +
-  "No markdown headings, no bullet lists.";
+  "Rephrase the given facts into a friendly, natural reply. " +
+  "STRICT RULES: Mention EVERY room and EVERY device state exactly as given — never drop, merge, " +
+  "summarise away or omit any room or number. Only use the facts provided; never invent, add or " +
+  "guess any rooms, device names, numbers, times, equipment (e.g. PCs, ACs) or people that are not " +
+  "in the text, and do not introduce specifics (like room numbers) that were not provided. " +
+  "Keep it conversational (one short clause per room is fine) — completeness matters more than " +
+  "brevity. No markdown headings, no bullet lists.";
 
 /**
  * Call an OpenAI-compatible chat-completions endpoint (Groq and OpenAI share
