@@ -4,6 +4,8 @@ Monitor a small office's lights and fans through a **live web dashboard** and a 
 
 ![Office Energy Monitor — System Diagram](./GithubImages/SystemDiagram.drawio.png)
 
+_Editable source: [draw.io file](https://drive.google.com/file/d/1Zz894QOD175mB1b6Pxd9l28LW-5Kj_r9/view?usp=sharing)_
+
 ## Highlights
 
 - **One backend, one source of truth.** A Node/TS process simulates 15 devices, tracks energy use, raises alerts, serves REST, and broadcasts every change over Socket.IO. The dashboard and bot only ever read from it.
