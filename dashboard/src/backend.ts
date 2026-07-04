@@ -6,6 +6,9 @@
  * for example `https://office-backend.onrender.com`, so the dashboard connects
  * to it directly instead of to the static host.
  */
-export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "";
+export const BACKEND_URL = ((import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "").replace(
+  /\/+$/,
+  "",
+);
 
 export const apiUrl = (path: string): string => `${BACKEND_URL}${path}`;
