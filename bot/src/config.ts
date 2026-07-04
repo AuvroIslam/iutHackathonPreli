@@ -1,6 +1,6 @@
 /**
- * Bot configuration from env. The LLM humanizer tries Groq first, then falls
- * back to OpenAI, then to deterministic templates — so it always answers, with
+ * Bot configuration from env. The LLM humanizer tries OpenAI first, then falls
+ * back to Groq, then to deterministic templates — so it always answers, with
  * or without keys. Each provider is enabled simply by setting its API key.
  */
 export const config = {

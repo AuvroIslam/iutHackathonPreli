@@ -71,23 +71,23 @@ const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
 /**
- * Rephrase factual text into a friendly reply. Tries Groq first, then OpenAI,
+ * Rephrase factual text into a friendly reply. Tries OpenAI first, then Groq,
  * then falls back to the raw facts (deterministic template) — so the bot always
  * answers with correct data even when a provider is missing, down or rate-limited.
  */
 export async function humanize(facts: string): Promise<string> {
-  if (config.groq.apiKey) {
-    try {
-      return await chatComplete(GROQ_URL, config.groq.apiKey, config.groq.model, facts);
-    } catch (error) {
-      console.warn("[bot] Groq failed, falling back to OpenAI:", (error as Error).message);
-    }
-  }
   if (config.openai.apiKey) {
     try {
       return await chatComplete(OPENAI_URL, config.openai.apiKey, config.openai.model, facts);
     } catch (error) {
-      console.warn("[bot] OpenAI failed, using template:", (error as Error).message);
+      console.warn("[bot] OpenAI failed, falling back to Groq:", (error as Error).message);
+    }
+  }
+  if (config.groq.apiKey) {
+    try {
+      return await chatComplete(GROQ_URL, config.groq.apiKey, config.groq.model, facts);
+    } catch (error) {
+      console.warn("[bot] Groq failed, using template:", (error as Error).message);
     }
   }
   return facts;

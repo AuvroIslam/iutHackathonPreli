@@ -58,7 +58,7 @@ The simulator and device state live **only in the backend**. See the full pictur
 
 - **Backend** — Node.js + TypeScript, Express (REST) + Socket.IO. In-memory simulator, alerts engine, usage accumulator.
 - **Dashboard** — React + Vite + TypeScript, live over Socket.IO.
-- **Bot** — discord.js; humanizes replies via **Groq → OpenAI**, falling back to deterministic templates when no key is set or a provider fails.
+- **Bot** — discord.js; humanizes replies via **OpenAI → Groq**, falling back to deterministic templates when no key is set or a provider fails.
 - **Shared** — one `@office/shared` package of types + constants imported by all three, so nothing drifts.
 
 ## Repository layout
@@ -121,12 +121,12 @@ Bot (`bot/.env`):
 | `DISCORD_TOKEN`            | —                       | **Required** to connect. Also enable the **Message Content** intent in the Discord Developer Portal. |
 | `DISCORD_ALERT_CHANNEL_ID` | —                       | Channel for proactive alert posts                                                                    |
 | `BACKEND_URL`              | `http://localhost:4000` | Where the shared backend lives (use the hosted URL in prod)                                          |
-| `GROQ_API_KEY`             | —                       | Enables Groq (tried first). Omit to skip.                                                            |
-| `GROQ_MODEL`               | `llama-3.1-8b-instant`  | Groq model override                                                                                  |
-| `OPENAI_API_KEY`           | —                       | Enables OpenAI (fallback if Groq fails). Omit to skip.                                               |
+| `OPENAI_API_KEY`           | —                       | Enables OpenAI (tried first). Omit to skip.                                                          |
 | `OPENAI_MODEL`             | `gpt-4o-mini`           | OpenAI model override                                                                                |
+| `GROQ_API_KEY`             | —                       | Enables Groq (fallback if OpenAI fails). Omit to skip.                                               |
+| `GROQ_MODEL`               | `llama-3.1-8b-instant`  | Groq model override                                                                                  |
 
-**LLM humanizer.** The bot rewrites the computed facts into a warm, human sentence. It tries **Groq first** ([console.groq.com](https://console.groq.com) — free), then falls back to **OpenAI** ([platform.openai.com](https://platform.openai.com/api-keys)) if Groq is missing/rate-limited, then to **built-in templates** if neither key is set. So the bot always replies with correct data — the LLM only changes the phrasing, never the numbers. A hardened system prompt keeps it from inventing rooms, devices or values that aren't in the data.
+**LLM humanizer.** The bot rewrites the computed facts into a warm, human sentence. It tries **OpenAI first** ([platform.openai.com](https://platform.openai.com/api-keys)), then falls back to **Groq** ([console.groq.com](https://console.groq.com) — free) if OpenAI is missing/rate-limited, then to **built-in templates** if neither key is set. So the bot always replies with correct data — the LLM only changes the phrasing, never the numbers. A hardened system prompt keeps it from inventing rooms, devices or values that aren't in the data.
 
 `.env` files are git-ignored; only the `.env.example` templates are committed. In production these values are set as **Azure App Settings** on the bot's App Service, not in a file.
 
